@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
+import authRoutes from "./routes/authRoutes.js";
 
 import connectDB from "./config/db.js";
 
@@ -43,3 +44,6 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server Running on Port ${PORT}`);
 });
+
+
+app.use("/api/auth", authRoutes);
