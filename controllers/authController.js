@@ -52,19 +52,16 @@ export const login = async (req, res) => {
         message: "Invalid Email",
       });
     }
-
     const match = await bcrypt.compare(
       password,
       user.password
     );
-
     if (!match) {
       return res.status(400).json({
         success: false,
         message: "Invalid Password",
       });
     }
-
     res.json({
       success: true,
       message: "Login Successful",
