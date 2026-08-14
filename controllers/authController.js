@@ -2,34 +2,43 @@ import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import generateToken from "../utils/generateToken.js";
 
-export const register = async (req, res) => {
+const register = async (req, res) => {
   try {
-    const { fullName, email, phone, password } = req.body;
+    const {
+      fullName,
+      email,
+      password,
+      phone,
+      address,
+      role,
+    } = req.body;
 
-    const userExists = await User.findOne({ email });
+    const existingUser = await User.findOne({ email });
 
-    if (userExists) {
+    if (existingUser) {
       return res.status(400).json({
         success: false,
         message: "Email already exists",
       });
     }
 
-    const salt = await bcrypt.genSalt(10);
-
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
       fullName,
       email,
-      phone,
       password: hashedPassword,
+      phone,
+      address,
+      role,
     });
+
+    const token = generateToken(user._id, user.role);
 
     res.status(201).json({
       success: true,
-      message: "Registration Successful",
-      token: generateToken(user._id),
+      message: "Registration successful",
+      token,
       user,
     });
   } catch (error) {
@@ -40,32 +49,41 @@ export const register = async (req, res) => {
   }
 };
 
-export const login = async (req, res) => {
+
+const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const {
+      email,
+      password,
+    } = req.body;
 
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(400).json({
+      return res.status(401).json({
         success: false,
-        message: "Invalid Email",
+        message: "Invalid email or password",
       });
     }
+
     const match = await bcrypt.compare(
       password,
       user.password
     );
+
     if (!match) {
-      return res.status(400).json({
+      return res.status(401).json({
         success: false,
-        message: "Invalid Password",
+        message: "Invalid email or password",
       });
     }
-    res.json({
+
+    const token = generateToken(user._id, user.role);
+
+    res.status(200).json({
       success: true,
-      message: "Login Successful",
-      token: generateToken(user._id),
+      message: "Login successful",
+      token,
       user,
     });
   } catch (error) {
@@ -74,4 +92,24 @@ export const login = async (req, res) => {
       message: error.message,
     });
   }
+};
+
+const getProfile = async (req, res) => {
+  try {
+    res.status(200).json({
+      success: true,
+      user: req.user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export {
+  register,
+  login,
+  getProfile,
 };
