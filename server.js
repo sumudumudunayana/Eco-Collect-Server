@@ -3,9 +3,11 @@ import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
-import authRoutes from "./routes/authRoutes.js";
 
 import connectDB from "./config/db.js";
+import authRoutes from "./routes/authRoutes.js";
+import collectionRoutes from "./routes/collectionRoutes.js";
+import productRoutes from "./routes/productRoutes.js";
 
 dotenv.config();
 
@@ -15,18 +17,30 @@ const app = express();
 
 /* Middleware */
 
-app.use(cors({
+app.use(
+  cors({
     origin: "http://localhost:5173",
-    credentials: true
-}));
+    credentials: true,
+  })
+);
 
 app.use(express.json());
-
 app.use(express.urlencoded({ extended: true }));
-
 app.use(cookieParser());
-
 app.use(morgan("dev"));
+
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
+
+/* Routes */
+
+app.use("/api/auth", authRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/collections", collectionRoutes);
+app.use("/api/products", productRoutes);
+
 
 /* Test Route */
 
@@ -39,11 +53,8 @@ app.get("/", (req, res) => {
 
 /* Port */
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5300;
 
 app.listen(PORT, () => {
   console.log(`🚀 Server Running on Port ${PORT}`);
 });
-
-
-app.use("/api/auth", authRoutes);
