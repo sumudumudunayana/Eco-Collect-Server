@@ -108,8 +108,50 @@ const getProfile = async (req, res) => {
   }
 };
 
+
+
+const updateProfile = async (req, res) => {
+  try {
+    const {
+      fullName,
+      phone,
+      address,
+      profileImage,
+    } = req.body;
+
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    user.fullName = fullName || user.fullName;
+    user.phone = phone || user.phone;
+    user.address = address || user.address;
+    user.profileImage =
+      profileImage || user.profileImage;
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 export {
   register,
   login,
   getProfile,
+  updateProfile,
 };
