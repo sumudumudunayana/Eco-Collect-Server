@@ -23,7 +23,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
     credentials: true,
   }),
 );
@@ -40,7 +40,6 @@ app.use((req, res, next) => {
 
 /* Routes */
 
-app.use("/api/auth", authRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/collections", collectionRoutes);
 app.use("/api/products", productRoutes);
@@ -61,6 +60,10 @@ app.get("/", (req, res) => {
   });
 });
 
+app.get("/api/health", (req, res) => {
+  res.json({ success: true, message: "EcoCollect API is running" });
+});
+
 /* Port */
 
 const PORT = process.env.PORT || 5300;
@@ -68,3 +71,4 @@ const PORT = process.env.PORT || 5300;
 app.listen(PORT, () => {
   console.log(`🚀 Server Running on Port ${PORT}`);
 });
+
