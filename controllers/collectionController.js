@@ -14,6 +14,11 @@ const getCitizenSchedule = async (req, res) => {
 
     const formattedCollections = collections.map((collection) => {
       const date = new Date(collection.collectionDate);
+      const collector = collection.collector || {
+        _id: null,
+        fullName: "Assigned collector",
+        phone: "",
+      };
 
       return {
         id: collection._id,
@@ -41,11 +46,11 @@ const getCitizenSchedule = async (req, res) => {
         notes: collection.notes,
 
         collector: {
-          id: collection.collector._id,
+          id: collector._id,
 
-          name: collection.collector.fullName,
+          name: collector.fullName,
 
-          phone: collection.collector.phone,
+          phone: collector.phone || "",
         },
       };
     });
@@ -66,11 +71,9 @@ const getCitizenSchedule = async (req, res) => {
   }
 };
 
-
 // GET /api/collections
 const getAllCollections = async (req, res) => {
   try {
-
     const collections = await Collection.find()
 
       .populate("citizen", "fullName email phone")
@@ -86,26 +89,18 @@ const getAllCollections = async (req, res) => {
       count: collections.length,
       collections,
     });
-
   } catch (error) {
-
     res.status(500).json({
       success: false,
       message: error.message,
     });
-
   }
 };
-
-
 
 // GET /api/collections/:id
 const getCollectionById = async (req, res) => {
   try {
-
-    const collection = await Collection.findById(
-      req.params.id
-    )
+    const collection = await Collection.findById(req.params.id)
 
       .populate("citizen")
 
@@ -122,23 +117,17 @@ const getCollectionById = async (req, res) => {
       success: true,
       collection,
     });
-
   } catch (error) {
-
     res.status(500).json({
       success: false,
       message: error.message,
     });
-
   }
 };
-
-
 
 // POST /api/collections
 const createCollection = async (req, res) => {
   try {
-
     const collection = await Collection.create(req.body);
 
     res.status(201).json({
@@ -146,33 +135,25 @@ const createCollection = async (req, res) => {
       message: "Collection created successfully",
       collection,
     });
-
   } catch (error) {
-
     res.status(500).json({
       success: false,
       message: error.message,
     });
-
   }
 };
-
-
-
 
 // PUT /api/collections/:id
 const updateCollection = async (req, res) => {
   try {
-
-    const collection =
-      await Collection.findByIdAndUpdate(
-        req.params.id,
-        req.body,
-        {
-          new: true,
-          runValidators: true,
-        }
-      );
+    const collection = await Collection.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      {
+        new: true,
+        runValidators: true,
+      },
+    );
 
     if (!collection) {
       return res.status(404).json({
@@ -186,25 +167,18 @@ const updateCollection = async (req, res) => {
       message: "Collection updated successfully",
       collection,
     });
-
   } catch (error) {
-
     res.status(500).json({
       success: false,
       message: error.message,
     });
-
   }
 };
-
-
 
 // DELETE /api/collections/:id
 const deleteCollection = async (req, res) => {
   try {
-
-    const collection =
-      await Collection.findById(req.params.id);
+    const collection = await Collection.findById(req.params.id);
 
     if (!collection) {
       return res.status(404).json({
@@ -219,25 +193,17 @@ const deleteCollection = async (req, res) => {
       success: true,
       message: "Collection deleted successfully",
     });
-
   } catch (error) {
-
     res.status(500).json({
       success: false,
       message: error.message,
     });
-
   }
 };
-
-
-
-
 
 // GET /api/collections/collector
 const getCollectorCollections = async (req, res) => {
   try {
-
     const collections = await Collection.find({
       collector: req.user._id,
     })
@@ -253,31 +219,21 @@ const getCollectorCollections = async (req, res) => {
       count: collections.length,
       collections,
     });
-
   } catch (error) {
-
     res.status(500).json({
       success: false,
       message: error.message,
     });
-
   }
 };
 
-
-
-
 // PUT /api/collections/:id/status
-const updateCollectionStatus = async (
-  req,
-  res
-) => {
+// PUT /api/collections/:id/status
+const updateCollectionStatus = async (req, res) => {
   try {
+    const { status, reason } = req.body;
 
-    const { status } = req.body;
-
-    const collection =
-      await Collection.findById(req.params.id);
+    const collection = await Collection.findById(req.params.id);
 
     if (!collection) {
       return res.status(404).json({
@@ -288,6 +244,10 @@ const updateCollectionStatus = async (
 
     collection.status = status;
 
+    if (reason) {
+      collection.notes = reason;
+    }
+
     await collection.save();
 
     res.status(200).json({
@@ -295,14 +255,11 @@ const updateCollectionStatus = async (
       message: "Status updated successfully",
       collection,
     });
-
   } catch (error) {
-
     res.status(500).json({
       success: false,
       message: error.message,
     });
-
   }
 };
 
