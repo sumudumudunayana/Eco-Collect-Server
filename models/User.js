@@ -13,15 +13,24 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
       lowercase: true,
-    },
-
-    phone: {
-      type: String,
+      trim: true,
     },
 
     password: {
       type: String,
       required: true,
+      minlength: 6,
+    },
+
+    phone: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    address: {
+      type: String,
+      default: "",
     },
 
     role: {
@@ -35,6 +44,11 @@ const userSchema = new mongoose.Schema(
       default: "",
     },
 
+    ecoPoints: {
+      type: Number,
+      default: 0,
+    },
+
     isActive: {
       type: Boolean,
       default: true,
@@ -42,7 +56,9 @@ const userSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
-export default mongoose.model("User", userSchema);
+const User = mongoose.model("User", userSchema);
+
+export default User;
